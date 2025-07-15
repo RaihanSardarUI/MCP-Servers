@@ -1,0 +1,290 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Dashboard - MCP Directory">
+  <div class="container mx-auto px-4 py-8">
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-8">
+      <div>
+        <h1 class="text-3xl font-bold">Dashboard</h1>
+        <p class="text-base-content/70 mt-1">Manage your MCP servers</p>
+      </div>
+      <a href="/servers/add" class="btn btn-primary">
+        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+        </svg>
+        Add Server
+      </a>
+    </div>
+
+    <!-- User Info Card -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+      <div class="card bg-base-100 shadow-xl">
+        <div class="card-body">
+          <div class="flex items-center gap-4">
+            <div class="avatar">
+              <div class="w-16 h-16 rounded-full">
+                <img id="user-avatar" src="" alt="User avatar" />
+              </div>
+            </div>
+            <div>
+              <h2 class="card-title" id="user-name">Loading...</h2>
+              <p class="text-base-content/70" id="user-email">Loading...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card bg-base-100 shadow-xl">
+        <div class="card-body">
+          <h2 class="card-title text-primary">
+            <span id="server-count">0</span>
+          </h2>
+          <p class="text-base-content/70">Servers Published</p>
+        </div>
+      </div>
+
+      <div class="card bg-base-100 shadow-xl">
+        <div class="card-body">
+          <h2 class="card-title text-secondary">
+            <span id="total-stars">0</span>
+          </h2>
+          <p class="text-base-content/70">Total Stars</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Servers Section -->
+    <div class="card bg-base-100 shadow-xl">
+      <div class="card-body">
+        <h2 class="card-title mb-6">Your Servers</h2>
+        
+        <div id="loading-servers" class="text-center py-8">
+          <span class="loading loading-spinner loading-lg"></span>
+          <p class="mt-4">Loading your servers...</p>
+        </div>
+
+        <div id="no-servers" class="text-center py-12 hidden">
+          <svg class="w-16 h-16 mx-auto text-base-content/40 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+          </svg>
+          <h3 class="text-xl font-semibold mb-2">No servers yet</h3>
+          <p class="text-base-content/60 mb-4">Start by adding your first MCP server</p>
+          <a href="/servers/add" class="btn btn-primary">
+            Add Your First Server
+          </a>
+        </div>
+
+        <div id="servers-table" class="hidden">
+          <div class="overflow-x-auto">
+            <table class="table table-zebra w-full">
+              <thead>
+                <tr>
+                  <th>Server</th>
+                  <th>Description</th>
+                  <th>Stats</th>
+                  <th>Created</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="servers-tbody">
+                <!-- Server rows will be populated here -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<script>
+  document.addEventListener('DOMContentLoaded', async () => {
+    // Check authentication
+    const token = localStorage.getItem('token');
+    const user = localStorage.getItem('user');
+    
+    if (!token || !user) {
+      window.location.href = '/auth/login';
+      return;
+    }
+    
+    const userData = JSON.parse(user);
+    
+    // Populate user info
+    document.getElementById('user-name').textContent = userData.name;
+    document.getElementById('user-email').textContent = userData.email;
+    document.getElementById('user-avatar').src = userData.avatar_url;
+    
+    // Load user servers
+    await loadUserServers();
+  });
+  
+  async function loadUserServers() {
+    const token = localStorage.getItem('token');
+    const loadingEl = document.getElementById('loading-servers');
+    const noServersEl = document.getElementById('no-servers');
+    const tableEl = document.getElementById('servers-table');
+    
+    try {
+      const response = await fetch('/api/servers', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        const userServers = data.servers.filter(server => {
+          const user = JSON.parse(localStorage.getItem('user'));
+          return server.owner_name === user.name;
+        });
+        
+        if (userServers.length === 0) {
+          noServersEl.classList.remove('hidden');
+        } else {
+          tableEl.classList.remove('hidden');
+          populateServersTable(userServers);
+        }
+        
+        // Update stats
+        document.getElementById('server-count').textContent = userServers.length;
+        document.getElementById('total-stars').textContent = userServers.reduce((sum, server) => sum + server.stars, 0);
+      }
+    } catch (error) {
+      console.error('Error loading servers:', error);
+      showToast('Error loading servers', 'error');
+    } finally {
+      loadingEl.classList.add('hidden');
+    }
+  }
+  
+  function populateServersTable(servers) {
+    const tbody = document.getElementById('servers-tbody');
+    tbody.innerHTML = '';
+    
+    servers.forEach(server => {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>
+          <div class="flex items-center gap-3">
+            <div class="avatar">
+              <div class="w-10 h-10 rounded-lg">
+                <img src="${server.logo_url || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(server.name)}`}" alt="${server.name}" />
+              </div>
+            </div>
+            <div>
+              <div class="font-bold">${server.name}</div>
+              <div class="text-sm text-base-content/70">${server.slug}</div>
+            </div>
+          </div>
+        </td>
+        <td>
+          <div class="text-sm line-clamp-2">
+            ${server.description || 'No description'}
+          </div>
+        </td>
+        <td>
+          <div class="flex items-center gap-4 text-sm">
+            <div class="flex items-center gap-1">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+              </svg>
+              <span>${server.stars}</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M7.707 3.293a1 1 0 010 1.414L5.414 7H11a7 7 0 017 7v2a1 1 0 11-2 0v-2a5 5 0 00-5-5H5.414l2.293 2.293a1 1 0 11-1.414 1.414L2.586 7l3.707-3.707a1 1 0 011.414 0z" clip-rule="evenodd"/>
+              </svg>
+              <span>${server.forks}</span>
+            </div>
+          </div>
+        </td>
+        <td>
+          <div class="text-sm">
+            ${new Date(server.created_at).toLocaleDateString()}
+          </div>
+        </td>
+        <td>
+          <div class="flex gap-2">
+            <a href="/servers/${server.slug}" class="btn btn-ghost btn-sm">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+              </svg>
+            </a>
+            <a href="/servers/${server.slug}/edit" class="btn btn-ghost btn-sm">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+              </svg>
+            </a>
+            <button class="btn btn-ghost btn-sm text-error" onclick="deleteServer('${server.slug}')">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+              </svg>
+            </button>
+          </div>
+        </td>
+      `;
+      tbody.appendChild(row);
+    });
+  }
+  
+  async function deleteServer(slug) {
+    if (!confirm('Are you sure you want to delete this server? This action cannot be undone.')) {
+      return;
+    }
+    
+    const token = localStorage.getItem('token');
+    
+    try {
+      const response = await fetch(`/api/servers/${slug}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        showToast('Server deleted successfully', 'success');
+        loadUserServers(); // Reload the table
+      } else {
+        showToast(data.error || 'Failed to delete server', 'error');
+      }
+    } catch (error) {
+      console.error('Error deleting server:', error);
+      showToast('Error deleting server', 'error');
+    }
+  }
+  
+  function showToast(message, type) {
+    // Create toast element
+    const toast = document.createElement('div');
+    toast.className = `toast toast-top toast-end`;
+    toast.innerHTML = `
+      <div class="alert alert-${type === 'success' ? 'success' : 'error'}">
+        <span>${message}</span>
+      </div>
+    `;
+    
+    document.body.appendChild(toast);
+    
+    // Remove toast after 3 seconds
+    setTimeout(() => {
+      toast.remove();
+    }, 3000);
+  }
+</script>
+
+<style>
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+</style> 

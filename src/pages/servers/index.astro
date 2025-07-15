@@ -1,0 +1,315 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="MCP Servers - Browse All Servers">
+  <div class="container mx-auto px-4 py-8">
+    <!-- Header -->
+    <div class="text-center mb-12">
+      <h1 class="text-4xl font-bold mb-4">MCP Servers</h1>
+      <p class="text-xl text-base-content/70">
+        Discover Model Context Protocol servers and tools
+      </p>
+    </div>
+
+    <!-- Search and Filters -->
+    <div class="bg-base-200 rounded-lg p-6 mb-8">
+      <div class="flex flex-col lg:flex-row gap-4 items-center">
+        <!-- Search -->
+        <div class="form-control flex-1">
+          <div class="input-group">
+            <input 
+              type="text" 
+              placeholder="Search servers..." 
+              class="input input-bordered w-full"
+              id="search-input"
+            />
+            <button class="btn btn-primary" onclick="applyFilters()">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Sort -->
+        <div class="form-control">
+          <select class="select select-bordered" id="sort-select" onchange="applyFilters()">
+            <option value="newest">Newest First</option>
+            <option value="stars">Most Stars</option>
+            <option value="alphabetical">Alphabetical</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Tag Filters -->
+      <div class="flex flex-wrap gap-2 mt-4" id="tag-filters">
+        <span class="text-sm font-medium">Popular tags:</span>
+        <button class="btn btn-outline btn-sm" onclick="toggleTagFilter('npm')">npm</button>
+        <button class="btn btn-outline btn-sm" onclick="toggleTagFilter('python')">python</button>
+        <button class="btn btn-outline btn-sm" onclick="toggleTagFilter('typescript')">typescript</button>
+        <button class="btn btn-outline btn-sm" onclick="toggleTagFilter('ai')">ai</button>
+        <button class="btn btn-outline btn-sm" onclick="toggleTagFilter('tool')">tool</button>
+        <button class="btn btn-outline btn-sm" onclick="toggleTagFilter('api')">api</button>
+      </div>
+    </div>
+
+    <!-- Results -->
+    <div id="results-container">
+      <div id="loading" class="text-center py-12">
+        <span class="loading loading-spinner loading-lg"></span>
+        <p class="mt-4">Loading servers...</p>
+      </div>
+
+      <div id="servers-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 hidden">
+        <!-- Server cards will be loaded here -->
+      </div>
+
+      <div id="no-results" class="text-center py-12 hidden">
+        <svg class="w-16 h-16 mx-auto text-base-content/40 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+        </svg>
+        <h3 class="text-xl font-semibold mb-2">No servers found</h3>
+        <p class="text-base-content/60">Try adjusting your search or filters</p>
+      </div>
+    </div>
+
+    <!-- Load More -->
+    <div id="load-more-container" class="text-center mt-8 hidden">
+      <button class="btn btn-primary btn-lg" onclick="loadMore()">
+        Load More Servers
+      </button>
+    </div>
+  </div>
+</BaseLayout>
+
+<script>
+  let currentPage = 0;
+  let isLoading = false;
+  let hasMore = true;
+  let activeFilters = {
+    search: '',
+    tags: [],
+    sort: 'newest'
+  };
+
+  // Initialize from URL parameters
+  function initializeFromURL() {
+    const params = new URLSearchParams(window.location.search);
+    
+    const search = params.get('search') || '';
+    const tag = params.get('tag');
+    const sort = params.get('sort') || 'newest';
+    
+    document.getElementById('search-input').value = search;
+    document.getElementById('sort-select').value = sort;
+    
+    activeFilters.search = search;
+    activeFilters.sort = sort;
+    
+    if (tag) {
+      activeFilters.tags = [tag];
+      updateTagButtons();
+    }
+  }
+
+  async function loadServers(reset = false) {
+    if (isLoading) return;
+    
+    isLoading = true;
+    const loadingEl = document.getElementById('loading');
+    const gridEl = document.getElementById('servers-grid');
+    const noResultsEl = document.getElementById('no-results');
+    
+    if (reset) {
+      currentPage = 0;
+      gridEl.innerHTML = '';
+      gridEl.classList.add('hidden');
+      noResultsEl.classList.add('hidden');
+      loadingEl.classList.remove('hidden');
+    }
+    
+    try {
+      const params = new URLSearchParams({
+        limit: '12',
+        offset: (currentPage * 12).toString(),
+        sort: activeFilters.sort
+      });
+      
+      const response = await fetch(`/api/servers?${params}`);
+      const data = await response.json();
+      
+      if (data.success) {
+        let servers = data.servers;
+        
+        // Client-side filtering
+        if (activeFilters.search) {
+          const searchTerm = activeFilters.search.toLowerCase();
+          servers = servers.filter(server => 
+            server.name.toLowerCase().includes(searchTerm) ||
+            server.description?.toLowerCase().includes(searchTerm) ||
+            server.tags.some(tag => tag.toLowerCase().includes(searchTerm))
+          );
+        }
+        
+        if (activeFilters.tags.length > 0) {
+          servers = servers.filter(server => 
+            activeFilters.tags.some(tag => server.tags.includes(tag))
+          );
+        }
+        
+        if (servers.length === 0 && currentPage === 0) {
+          noResultsEl.classList.remove('hidden');
+        } else {
+          gridEl.classList.remove('hidden');
+          servers.forEach(server => {
+            const serverCard = createServerCard(server);
+            gridEl.appendChild(serverCard);
+          });
+        }
+        
+        hasMore = data.servers.length === 12;
+        updateLoadMoreButton();
+        currentPage++;
+      }
+    } catch (error) {
+      console.error('Error loading servers:', error);
+    } finally {
+      isLoading = false;
+      loadingEl.classList.add('hidden');
+    }
+  }
+
+  function createServerCard(server) {
+    const card = document.createElement('div');
+    card.className = 'card bg-base-100 shadow-xl hover:shadow-2xl transition-shadow duration-300';
+    
+    card.innerHTML = `
+      <div class="card-body">
+        <div class="flex items-start gap-4">
+          <div class="avatar">
+            <div class="w-12 h-12 rounded-lg">
+              <img src="${server.logo_url || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(server.name)}`}" alt="${server.name}" />
+            </div>
+          </div>
+          
+          <div class="flex-1">
+            <h2 class="card-title text-lg">
+              <a href="/servers/${server.slug}" class="link link-hover">${server.name}</a>
+            </h2>
+            
+            <p class="text-sm text-base-content/70 mt-1 line-clamp-2">
+              ${server.description || 'No description available'}
+            </p>
+            
+            <div class="flex items-center gap-4 mt-3 text-sm text-base-content/60">
+              <div class="flex items-center gap-1">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                </svg>
+                <span>${server.stars}</span>
+              </div>
+              
+              <div class="flex items-center gap-1">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M7.707 3.293a1 1 0 010 1.414L5.414 7H11a7 7 0 017 7v2a1 1 0 11-2 0v-2a5 5 0 00-5-5H5.414l2.293 2.293a1 1 0 11-1.414 1.414L2.586 7l3.707-3.707a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                </svg>
+                <span>${server.forks}</span>
+              </div>
+            </div>
+            
+            <div class="flex items-center gap-2 mt-3">
+              <div class="avatar">
+                <div class="w-6 h-6 rounded-full">
+                  <img src="${server.owner_avatar}" alt="${server.owner_name}" />
+                </div>
+              </div>
+              <span class="text-sm text-base-content/70">${server.owner_name}</span>
+            </div>
+          </div>
+        </div>
+        
+        ${server.tags.length > 0 ? `
+          <div class="flex flex-wrap gap-1 mt-4">
+            ${server.tags.slice(0, 3).map(tag => `<span class="badge badge-outline badge-sm">${tag}</span>`).join('')}
+            ${server.tags.length > 3 ? `<span class="badge badge-outline badge-sm">+${server.tags.length - 3}</span>` : ''}
+          </div>
+        ` : ''}
+        
+        <div class="card-actions justify-end mt-4">
+          <a href="/servers/${server.slug}" class="btn btn-primary btn-sm">
+            View Details
+          </a>
+        </div>
+      </div>
+    `;
+    
+    return card;
+  }
+
+  function applyFilters() {
+    activeFilters.search = document.getElementById('search-input').value;
+    activeFilters.sort = document.getElementById('sort-select').value;
+    loadServers(true);
+  }
+
+  function toggleTagFilter(tag) {
+    const index = activeFilters.tags.indexOf(tag);
+    if (index > -1) {
+      activeFilters.tags.splice(index, 1);
+    } else {
+      activeFilters.tags.push(tag);
+    }
+    updateTagButtons();
+    loadServers(true);
+  }
+
+  function updateTagButtons() {
+    const buttons = document.querySelectorAll('#tag-filters button');
+    buttons.forEach(button => {
+      const tag = button.textContent;
+      if (activeFilters.tags.includes(tag)) {
+        button.classList.add('btn-primary');
+        button.classList.remove('btn-outline');
+      } else {
+        button.classList.remove('btn-primary');
+        button.classList.add('btn-outline');
+      }
+    });
+  }
+
+  function updateLoadMoreButton() {
+    const container = document.getElementById('load-more-container');
+    if (hasMore && !isLoading) {
+      container.classList.remove('hidden');
+    } else {
+      container.classList.add('hidden');
+    }
+  }
+
+  function loadMore() {
+    loadServers(false);
+  }
+
+  // Handle search on Enter key
+  document.getElementById('search-input').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+      applyFilters();
+    }
+  });
+
+  // Initialize on page load
+  document.addEventListener('DOMContentLoaded', () => {
+    initializeFromURL();
+    loadServers(true);
+  });
+</script>
+
+<style>
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+</style> 

@@ -1,0 +1,62 @@
+name = "mcp-directory"
+main = "dist/_worker.js"
+compatibility_date = "2023-12-01"
+compatibility_flags = ["nodejs_compat"]
+
+[env.production]
+name = "mcp-directory"
+
+[env.staging]
+name = "mcp-directory-staging"
+
+# Database configuration
+[[env.production.d1_databases]]
+binding = "DB"
+database_name = "mcp-directory-db"
+database_id = "6ace1f68-ea13-4cbe-806b-a9996d5887ad"
+
+[[env.staging.d1_databases]]
+binding = "DB"
+database_name = "mcp-directory-db"
+database_id = "6ace1f68-ea13-4cbe-806b-a9996d5887ad"
+
+# Environment variables
+[env.production.vars]
+JWT_SECRET = "mcp-directory-production-jwt-secret-2024"
+ENVIRONMENT = "production"
+
+[env.staging.vars]
+JWT_SECRET = "mcp-directory-staging-jwt-secret-2024"
+ENVIRONMENT = "staging"
+
+# KV namespaces (optional for caching) - uncomment and configure if needed
+# [[env.production.kv_namespaces]]
+# binding = "CACHE"
+# id = "your-kv-namespace-id"
+
+# [[env.staging.kv_namespaces]]
+# binding = "CACHE"
+# id = "your-staging-kv-namespace-id"
+
+# Build configuration
+[build]
+command = "npm run build"
+
+# Assets configuration
+[assets]
+directory = "dist"
+binding = "ASSETS"
+
+# Pages configuration for static assets
+[pages]
+command = "npm run build"
+directory = "dist"
+
+# Rate limiting (optional)
+[limits]
+cpu_ms = 50000
+
+# Cron triggers (optional for periodic tasks)
+[[crons]]
+cron = "0 0 * * *"
+name = "daily-cleanup" 

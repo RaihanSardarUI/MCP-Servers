@@ -1,0 +1,140 @@
+---
+export interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description = "Directory of MCP servers and tools" } = Astro.props;
+---
+
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="description" content={description} />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <title>{title}</title>
+  
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content={Astro.url} />
+  <meta property="og:title" content={title} />
+  <meta property="og:description" content={description} />
+  
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image" />
+  <meta property="twitter:url" content={Astro.url} />
+  <meta property="twitter:title" content={title} />
+  <meta property="twitter:description" content={description} />
+</head>
+<body class="min-h-screen bg-base-100">
+  <header class="navbar bg-base-100 shadow-sm border-b">
+    <div class="navbar-start">
+      <a href="/" class="btn btn-ghost text-xl font-bold">
+        <span class="text-primary">MCP</span>
+        <span class="text-base-content">Directory</span>
+      </a>
+    </div>
+    
+    <div class="navbar-center hidden lg:flex">
+      <ul class="menu menu-horizontal px-1">
+        <li><a href="/" class="hover:text-primary">Home</a></li>
+        <li><a href="/servers" class="hover:text-primary">Servers</a></li>
+        <li><a href="/about" class="hover:text-primary">About</a></li>
+      </ul>
+    </div>
+    
+    <div class="navbar-end">
+      <div class="dropdown dropdown-end">
+        <div tabindex="0" role="button" class="btn btn-ghost btn-circle" aria-label="Theme">
+          <svg class="fill-current w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+            <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+          </svg>
+        </div>
+        <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
+          <li><a onclick="setTheme('light')">Light</a></li>
+          <li><a onclick="setTheme('dark')">Dark</a></li>
+        </ul>
+      </div>
+      
+      <div id="auth-buttons" class="hidden">
+        <a href="/auth/login" class="btn btn-ghost">Login</a>
+        <a href="/auth/register" class="btn btn-primary">Register</a>
+      </div>
+      
+      <div id="user-menu" class="dropdown dropdown-end hidden">
+        <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
+          <div class="w-10 rounded-full">
+            <img id="user-avatar" src="" alt="User avatar" />
+          </div>
+        </div>
+        <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
+          <li><a href="/dashboard">Dashboard</a></li>
+          <li><a href="/servers/add">Add Server</a></li>
+          <li><a onclick="logout()">Logout</a></li>
+        </ul>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-grow">
+    <slot />
+  </main>
+
+  <footer class="footer footer-center p-10 bg-base-200 text-base-content">
+    <div>
+      <p class="font-bold">
+        <span class="text-primary">MCP Directory</span>
+        <br>
+        Discover and share MCP servers
+      </p>
+      <p>Copyright © 2024 - All rights reserved</p>
+    </div>
+    <div>
+      <div class="grid grid-flow-col gap-4">
+        <a href="/about" class="link link-hover">About</a>
+        <a href="/contact" class="link link-hover">Contact</a>
+        <a href="https://github.com/your-username/mcp-directory" class="link link-hover">GitHub</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Theme handling
+    function setTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      localStorage.setItem('theme', theme);
+    }
+
+    // Load saved theme
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    setTheme(savedTheme);
+
+    // Auth handling
+    function checkAuth() {
+      const token = localStorage.getItem('token');
+      const user = localStorage.getItem('user');
+      
+      if (token && user) {
+        const userData = JSON.parse(user);
+        document.getElementById('auth-buttons').classList.add('hidden');
+        document.getElementById('user-menu').classList.remove('hidden');
+        document.getElementById('user-avatar').src = userData.avatar_url;
+      } else {
+        document.getElementById('auth-buttons').classList.remove('hidden');
+        document.getElementById('user-menu').classList.add('hidden');
+      }
+    }
+
+    function logout() {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = '/';
+    }
+
+    // Initialize auth state
+    checkAuth();
+  </script>
+</body>
+</html> 

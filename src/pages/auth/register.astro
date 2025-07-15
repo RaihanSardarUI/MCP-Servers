@@ -1,0 +1,243 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Register - MCP Directory">
+  <div class="min-h-screen flex items-center justify-center bg-base-200 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full space-y-8">
+      <div class="text-center">
+        <h2 class="mt-6 text-3xl font-extrabold text-base-content">
+          Create your account
+        </h2>
+        <p class="mt-2 text-sm text-base-content/60">
+          Or
+          <a href="/auth/login" class="font-medium text-primary hover:text-primary-focus">
+            sign in to your existing account
+          </a>
+        </p>
+      </div>
+      
+      <div class="card bg-base-100 shadow-xl">
+        <div class="card-body">
+          <form id="register-form" class="space-y-6">
+            <div class="form-control">
+              <label class="label">
+                <span class="label-text">Full name</span>
+              </label>
+              <input 
+                id="name" 
+                name="name" 
+                type="text" 
+                required 
+                class="input input-bordered w-full"
+                placeholder="Enter your full name"
+              />
+            </div>
+            
+            <div class="form-control">
+              <label class="label">
+                <span class="label-text">Email address</span>
+              </label>
+              <input 
+                id="email" 
+                name="email" 
+                type="email" 
+                required 
+                class="input input-bordered w-full"
+                placeholder="Enter your email"
+              />
+            </div>
+            
+            <div class="form-control">
+              <label class="label">
+                <span class="label-text">Password</span>
+              </label>
+              <input 
+                id="password" 
+                name="password" 
+                type="password" 
+                required 
+                class="input input-bordered w-full"
+                placeholder="Enter your password"
+                minlength="6"
+              />
+              <label class="label">
+                <span class="label-text-alt">Password must be at least 6 characters</span>
+              </label>
+            </div>
+            
+            <div class="form-control">
+              <label class="label">
+                <span class="label-text">Confirm password</span>
+              </label>
+              <input 
+                id="confirm-password" 
+                name="confirm-password" 
+                type="password" 
+                required 
+                class="input input-bordered w-full"
+                placeholder="Confirm your password"
+              />
+            </div>
+            
+            <div class="form-control">
+              <label class="cursor-pointer label">
+                <input type="checkbox" class="checkbox" id="terms" required />
+                <span class="label-text ml-2">
+                  I agree to the 
+                  <a href="/terms" class="link link-primary">Terms of Service</a>
+                  and 
+                  <a href="/privacy" class="link link-primary">Privacy Policy</a>
+                </span>
+              </label>
+            </div>
+            
+            <div class="form-control">
+              <button 
+                type="submit" 
+                class="btn btn-primary w-full"
+                id="register-btn"
+              >
+                <span class="loading loading-spinner loading-sm hidden" id="register-loading"></span>
+                Create Account
+              </button>
+            </div>
+          </form>
+          
+          <div class="divider">OR</div>
+          
+          <div class="text-center">
+            <p class="text-sm text-base-content/60">
+              Already have an account?
+              <a href="/auth/login" class="link link-primary">
+                Sign in
+              </a>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // Check if already logged in
+    const token = localStorage.getItem('token');
+    if (token) {
+      window.location.href = '/dashboard';
+      return;
+    }
+    
+    const form = document.getElementById('register-form');
+    const registerBtn = document.getElementById('register-btn');
+    const loadingSpinner = document.getElementById('register-loading');
+    
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const formData = new FormData(form);
+      const name = formData.get('name');
+      const email = formData.get('email');
+      const password = formData.get('password');
+      const confirmPassword = formData.get('confirm-password');
+      const terms = formData.get('terms');
+      
+      // Validate form
+      if (!name || !email || !password || !confirmPassword) {
+        showToast('Please fill in all fields', 'error');
+        return;
+      }
+      
+      if (password !== confirmPassword) {
+        showToast('Passwords do not match', 'error');
+        return;
+      }
+      
+      if (password.length < 6) {
+        showToast('Password must be at least 6 characters', 'error');
+        return;
+      }
+      
+      if (!terms) {
+        showToast('Please accept the Terms of Service', 'error');
+        return;
+      }
+      
+      // Show loading state
+      registerBtn.disabled = true;
+      loadingSpinner.classList.remove('hidden');
+      
+      try {
+        const response = await fetch('/api/auth/register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ name, email, password }),
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          // Store token and user info
+          localStorage.setItem('token', data.token);
+          localStorage.setItem('user', JSON.stringify(data.user));
+          
+          showToast('Account created successfully!', 'success');
+          
+          // Redirect to dashboard
+          setTimeout(() => {
+            window.location.href = '/dashboard';
+          }, 1000);
+        } else {
+          showToast(data.error || 'Registration failed', 'error');
+        }
+      } catch (error) {
+        console.error('Registration error:', error);
+        showToast('An error occurred. Please try again.', 'error');
+      } finally {
+        registerBtn.disabled = false;
+        loadingSpinner.classList.add('hidden');
+      }
+    });
+    
+    // Real-time password confirmation validation
+    const password = document.getElementById('password');
+    const confirmPassword = document.getElementById('confirm-password');
+    
+    confirmPassword.addEventListener('input', () => {
+      if (confirmPassword.value && password.value !== confirmPassword.value) {
+        confirmPassword.setCustomValidity('Passwords do not match');
+      } else {
+        confirmPassword.setCustomValidity('');
+      }
+    });
+    
+    password.addEventListener('input', () => {
+      if (confirmPassword.value && password.value !== confirmPassword.value) {
+        confirmPassword.setCustomValidity('Passwords do not match');
+      } else {
+        confirmPassword.setCustomValidity('');
+      }
+    });
+  });
+  
+  function showToast(message, type) {
+    // Create toast element
+    const toast = document.createElement('div');
+    toast.className = `toast toast-top toast-end`;
+    toast.innerHTML = `
+      <div class="alert alert-${type === 'success' ? 'success' : 'error'}">
+        <span>${message}</span>
+      </div>
+    `;
+    
+    document.body.appendChild(toast);
+    
+    // Remove toast after 3 seconds
+    setTimeout(() => {
+      toast.remove();
+    }, 3000);
+  }
+</script> 

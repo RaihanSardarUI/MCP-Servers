@@ -1,0 +1,255 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="About - MCP Directory" description="Learn about the MCP Directory project and how it helps developers discover and share Model Context Protocol servers">
+  <div class="container mx-auto px-4 py-8">
+    <!-- Hero Section -->
+    <div class="hero bg-gradient-to-r from-primary to-secondary text-white rounded-lg mb-12">
+      <div class="hero-content text-center py-16">
+        <div class="max-w-md">
+          <h1 class="text-5xl font-bold mb-6">About MCP Directory</h1>
+          <p class="text-xl">
+            The central hub for discovering and sharing Model Context Protocol (MCP) servers
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <!-- Main Content -->
+      <div class="lg:col-span-2 space-y-8">
+        <!-- What is MCP Directory -->
+        <div class="card bg-base-100 shadow-xl">
+          <div class="card-body">
+            <h2 class="card-title text-2xl mb-4">What is MCP Directory?</h2>
+            <div class="prose max-w-none">
+              <p>
+                MCP Directory is a community-driven platform designed to help developers discover, share, and collaborate on Model Context Protocol (MCP) servers. As the MCP ecosystem grows, finding the right tools and servers becomes increasingly important for developers building AI applications.
+              </p>
+              
+              <p>
+                Our platform provides a centralized location where developers can:
+              </p>
+              
+              <ul class="list-disc list-inside space-y-2 text-base-content/80">
+                <li>Browse through a curated collection of MCP servers</li>
+                <li>Search and filter servers by tags, functionality, and popularity</li>
+                <li>View detailed information including documentation and usage examples</li>
+                <li>Submit their own MCP servers to share with the community</li>
+                <li>Track server statistics and community engagement</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Features -->
+        <div class="card bg-base-100 shadow-xl">
+          <div class="card-body">
+            <h2 class="card-title text-2xl mb-4">Key Features</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="space-y-4">
+                <div class="flex items-start gap-3">
+                  <div class="badge badge-primary badge-lg">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 class="font-semibold">GitHub Integration</h3>
+                    <p class="text-sm text-base-content/70">
+                      Automatic fetching of repository information, stars, and documentation
+                    </p>
+                  </div>
+                </div>
+                
+                <div class="flex items-start gap-3">
+                  <div class="badge badge-secondary badge-lg">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 class="font-semibold">Advanced Search</h3>
+                    <p class="text-sm text-base-content/70">
+                      Filter by tags, sort by popularity, and find exactly what you need
+                    </p>
+                  </div>
+                </div>
+                
+                <div class="flex items-start gap-3">
+                  <div class="badge badge-accent badge-lg">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 class="font-semibold">User Dashboard</h3>
+                    <p class="text-sm text-base-content/70">
+                      Manage your servers, track statistics, and engage with the community
+                    </p>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="space-y-4">
+                <div class="flex items-start gap-3">
+                  <div class="badge badge-info badge-lg">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M12.316 3.051a1 1 0 01.633 1.265l-4 12a1 1 0 11-1.898-.632l4-12a1 1 0 011.265-.633zM5.707 6.293a1 1 0 010 1.414L3.414 10l2.293 2.293a1 1 0 11-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0zm8.586 0a1 1 0 011.414 0l3 3a1 1 0 010 1.414l-3 3a1 1 0 11-1.414-1.414L16.586 10l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 class="font-semibold">Rich Documentation</h3>
+                    <p class="text-sm text-base-content/70">
+                      Markdown rendering, code examples, and installation instructions
+                    </p>
+                  </div>
+                </div>
+                
+                <div class="flex items-start gap-3">
+                  <div class="badge badge-warning badge-lg">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 class="font-semibold">Fast & Lightweight</h3>
+                    <p class="text-sm text-base-content/70">
+                      Built with Astro for maximum performance and minimal JavaScript
+                    </p>
+                  </div>
+                </div>
+                
+                <div class="flex items-start gap-3">
+                  <div class="badge badge-success badge-lg">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.293l-3-3a1 1 0 00-1.414 1.414L10.586 9.5 8.293 11.793a1 1 0 101.414 1.414l3-3a1 1 0 000-1.414z" clip-rule="evenodd"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 class="font-semibold">Open Source</h3>
+                    <p class="text-sm text-base-content/70">
+                      Community-driven development with transparent processes
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Getting Started -->
+        <div class="card bg-base-100 shadow-xl">
+          <div class="card-body">
+            <h2 class="card-title text-2xl mb-4">Getting Started</h2>
+            
+            <div class="space-y-6">
+              <div class="steps steps-vertical lg:steps-horizontal">
+                <div class="step step-primary">Browse</div>
+                <div class="step step-primary">Register</div>
+                <div class="step step-primary">Submit</div>
+                <div class="step">Share</div>
+              </div>
+              
+              <div class="prose max-w-none">
+                <h3 class="text-lg font-semibold">For Users</h3>
+                <p>
+                  Start by browsing our collection of MCP servers. Use the search and filter features to find servers that match your needs. Each server page includes detailed documentation, installation instructions, and usage examples.
+                </p>
+                
+                <h3 class="text-lg font-semibold">For Contributors</h3>
+                <p>
+                  Ready to share your MCP server? <a href="/auth/register" class="link link-primary">Create an account</a> and submit your server. Our GitHub integration makes it easy to sync your repository information and keep your listing up to date.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sidebar -->
+      <div class="space-y-6">
+        <!-- Stats -->
+        <div class="card bg-base-100 shadow-xl">
+          <div class="card-body">
+            <h3 class="card-title mb-4">Community Stats</h3>
+            <div class="stats stats-vertical">
+              <div class="stat">
+                <div class="stat-title">Total Servers</div>
+                <div class="stat-value text-primary" id="total-servers">0</div>
+              </div>
+              <div class="stat">
+                <div class="stat-title">Contributors</div>
+                <div class="stat-value text-secondary" id="total-contributors">0</div>
+              </div>
+              <div class="stat">
+                <div class="stat-title">GitHub Stars</div>
+                <div class="stat-value text-accent" id="total-stars">0</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Links -->
+        <div class="card bg-base-100 shadow-xl">
+          <div class="card-body">
+            <h3 class="card-title mb-4">Quick Links</h3>
+            <div class="space-y-2">
+              <a href="/servers" class="btn btn-outline btn-block">Browse Servers</a>
+              <a href="/auth/register" class="btn btn-primary btn-block">Join Community</a>
+              <a href="https://github.com/your-username/mcp-directory" target="_blank" rel="noopener noreferrer" class="btn btn-ghost btn-block">
+                <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 0C4.477 0 0 4.484 0 10.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0110 4.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.942.359.31.678.921.678 1.856 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0020 10.017C20 4.484 15.522 0 10 0z" clip-rule="evenodd"/>
+                </svg>
+                View on GitHub
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Contact -->
+        <div class="card bg-base-100 shadow-xl">
+          <div class="card-body">
+            <h3 class="card-title mb-4">Get Involved</h3>
+            <div class="space-y-3">
+              <p class="text-sm text-base-content/70">
+                Have questions or want to contribute? We'd love to hear from you!
+              </p>
+              <div class="space-y-2">
+                <a href="https://github.com/your-username/mcp-directory/issues" target="_blank" rel="noopener noreferrer" class="btn btn-outline btn-sm btn-block">
+                  Report Issues
+                </a>
+                <a href="https://github.com/your-username/mcp-directory/discussions" target="_blank" rel="noopener noreferrer" class="btn btn-outline btn-sm btn-block">
+                  Join Discussions
+                </a>
+                <a href="/contact" class="btn btn-outline btn-sm btn-block">
+                  Contact Us
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<script>
+  // Load community stats
+  document.addEventListener('DOMContentLoaded', async () => {
+    try {
+      const response = await fetch('/api/servers');
+      const data = await response.json();
+      
+      if (data.success) {
+        document.getElementById('total-servers').textContent = data.servers.length;
+        document.getElementById('total-contributors').textContent = new Set(data.servers.map(s => s.owner_name)).size;
+        document.getElementById('total-stars').textContent = data.servers.reduce((sum, s) => sum + s.stars, 0);
+      }
+    } catch (error) {
+      console.error('Error loading stats:', error);
+    }
+  });
+</script> 
