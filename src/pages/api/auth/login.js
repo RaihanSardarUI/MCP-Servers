@@ -15,6 +15,15 @@ export async function POST({ request, locals }) {
       });
     }
     
+    // Check if database is available
+    if (!locals.runtime?.env?.DB) {
+      console.error('Database not available:', locals.runtime?.env);
+      return new Response(JSON.stringify({ error: 'Database connection failed' }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+    
     const db = getDatabase(locals.runtime.env);
     
     // Get user by email

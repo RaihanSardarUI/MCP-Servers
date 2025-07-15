@@ -11,6 +11,15 @@ export async function GET({ request, locals }) {
     const offset = parseInt(url.searchParams.get('offset') || '0');
     const sort = url.searchParams.get('sort') || 'newest';
     
+    // Check if database is available
+    if (!locals.runtime?.env?.DB) {
+      console.error('Database not available:', locals.runtime?.env);
+      return new Response(JSON.stringify({ error: 'Database connection failed' }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+    
     const db = getDatabase(locals.runtime.env);
     const servers = await getServers(db, { limit, offset, sort });
     
@@ -53,6 +62,15 @@ export async function POST({ request, locals }) {
     if (!serverData.name) {
       return new Response(JSON.stringify({ error: 'Server name is required' }), {
         status: 400,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+    
+    // Check if database is available
+    if (!locals.runtime?.env?.DB) {
+      console.error('Database not available:', locals.runtime?.env);
+      return new Response(JSON.stringify({ error: 'Database connection failed' }), {
+        status: 500,
         headers: { 'Content-Type': 'application/json' }
       });
     }
